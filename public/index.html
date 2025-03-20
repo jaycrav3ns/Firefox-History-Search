@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firefox History Viewer</title>
+    <link href="assets/font-awesome/6.0.0/all.min.css" rel="stylesheet"> <!-- Local Font Awesome -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #010101;
+            color: white;
+            font-family: sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: auto;
+        }
+        .background-animation {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            background: linear-gradient(0deg, #000, #111);
+            opacity: 0.9;
+        }
+        .container {
+            position: relative;
+            z-index: 2;
+            background: #101010;
+            padding: 2.5rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 1200px;
+            box-shadow: 5px 7px 15px #000000, -5px -7px 15px #111;
+            border: 1px #333 solid;
+        }
+        h1 {
+            color: #FFD700;
+            text-align: center;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+        }
+        #search {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0A0A0A;
+            border: 1px solid #1a1a1a;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: inset 5px 5px 10px #050505, inset -5px -5px 10px #0f0f0f;
+            margin-bottom: 2rem;
+        }
+        #search:focus {
+            outline: none;
+            border-color: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
+        }
+        #history-container {
+            background: #101010;
+            border-radius: 10px;
+            overflow: auto;
+            box-shadow: 5px 7px 15px #000000, -5px -7px 15px #111;
+            max-height: 60vh;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            background: #1a1a1a;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+        th {
+            padding: 1rem;
+            text-align: left;
+            color: #FFD700;
+            cursor: pointer;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+        }
+        th:hover {
+            background: #333;
+        }
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid #333;
+        }
+        tbody tr:nth-child(odd) {
+            background: #151515;
+        }
+        tbody tr:hover {
+            background: #333;
+            transition: background-color 0.3s ease;
+        }
+        a {
+            color: #FFD700;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        #no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        @media (max-width: 768px) {
+            .container { padding: 1.5rem; width: 95%; }
+            h1 { font-size: 1.5rem; }
+            th, td { padding: 0.75rem; font-size: 0.9rem; }
+        }
+        .fas {
+            margin-left: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="container mx-auto p-4">
+        <h1>Firefox History Viewer</h1>
+        <div class="mb-4">
+            <input id="search" type="text" placeholder="Search history..." autocomplete="off">
+        </div>
+        <div id="history-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-sort="title">Title <i class="fas fa-sort"></i></th>
+                        <th data-sort="url">URL <i class="fas fa-sort"></i></th>
+                        <th data-sort="time">Time <i class="fas fa-sort"></i></th>
+                    </tr>
+                </thead>
+                <tbody id="history-body">
+                    <tr id="no-results"><td colspan="3">Type to search history...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <script src="assets/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            let sortField = 'time';
+            let sortOrder = 'desc';
+            let searchTerm = '';
+
+            // Only load history when searching
+            let searchTimeout;
+            $('#search').on('input', function () {
+                clearTimeout(searchTimeout);
+                searchTerm = $(this).val().trim();
+                searchTimeout = setTimeout(loadHistory, 300); // Debounce for 300ms
+            });
+
+            // Sort handler
+            $('th').on('click', function () {
+                if (!searchTerm) return; // Only sort if there's a search term
+                const newSortField = $(this).data('sort');
+                if (newSortField === sortField) {
+                    sortOrder = sortOrder === 'desc' ? 'asc' : 'desc';
+                } else {
+                    sortField = newSortField;
+                    sortOrder = 'desc';
+                }
+                loadHistory();
+            });
+
+            function loadHistory() {
+                const $tbody = $('#history-body');
+                $tbody.empty();
+
+                if (!searchTerm) {
+                    $tbody.append('<tr id="no-results"><td colspan="3">Type to search history...</td></tr>');
+                    return;
+                }
+
+                $.get('/api/history', { search: searchTerm, limit: 100, offset: 0 }, function (data) {
+                    if (data.length === 0) {
+                        $tbody.append('<tr id="no-results"><td colspan="3">No results found</td></tr>');
+                    } else {
+                        data.forEach(row => {
+                            $tbody.append(`
+                                <tr>
+                                    <td>${row.title || 'Untitled'}</td>
+                                    <td><a href="${row.url}" target="_blank">${row.url}</a></td>
+                                    <td>${row.time}</td>
+                                </tr>
+                            `);
+                        });
+                    }
+                }).fail(function () {
+                    $tbody.append('<tr id="no-results"><td colspan="3">Error loading history</td></tr>');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
