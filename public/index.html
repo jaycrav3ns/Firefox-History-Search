@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firefox History Viewer</title>
-    <link href="assets/font-awesome/6.0.0/all.min.css" rel="stylesheet"> <!-- Local Font Awesome -->
+    <link href="assets/font-awesome/6.0.0/all.min.css" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -12,25 +12,15 @@
             box-sizing: border-box;
         }
         body {
+						font-family: Sans-serif;
             background: #010101;
             color: white;
-            font-family: sans-serif;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
             overflow: auto;
-        }
-        .background-animation {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            top: 0;
-            left: 0;
-            z-index: 0;
-            background: linear-gradient(0deg, #000, #111);
-            opacity: 0.9;
         }
         .container {
             position: relative;
@@ -40,7 +30,7 @@
             border-radius: 10px;
             width: 90%;
             max-width: 1200px;
-            box-shadow: 5px 7px 15px #000000, -5px -7px 15px #111;
+            box-shadow: 5px 7px 15px #111, -5px -7px 15px #000;
             border: 1px #333 solid;
         }
         h1 {
@@ -48,6 +38,27 @@
             text-align: center;
             margin-bottom: 2rem;
             font-size: 2rem;
+        }
+				.export {
+						display: block;
+						margin-left: 92%;
+				}
+        button[type="submit"] {
+            padding: 0.6rem;
+						margin: 0 0 10px 0;
+            background: #FFA000;
+            border-radius: 10px;
+            color: #000;
+						font-family: Sans-serif;
+            font-size: 0.8rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 4px 4px 8px #000;
+            position: relative;
+        }
+        button:hover[type="submit"] {
+            background: #FFD700;
         }
         #search {
             width: 100%;
@@ -128,10 +139,14 @@
     </style>
 </head>
 <body>
-    <div class="background-animation"></div>
-    <div class="container mx-auto p-4">
-        <h1>Firefox History Viewer</h1>
-        <div class="mb-4">
+    <div class="container">
+        <h1>Firefox History Search</h1>
+        <div class="export">
+            <button type="submit" id="export">
+                <i class="fa-solid fa-download"></i> Export
+            </button>
+				</div>
+        <div>
             <input id="search" type="text" placeholder="Search history..." autocomplete="off">
         </div>
         <div id="history-container">
@@ -205,6 +220,30 @@
                 });
             }
         });
+
+				document.getElementById('export').addEventListener('click', function () {
+				    const rows = document.querySelectorAll('#history-body tr');
+				    let jsonData = [];
+
+				    rows.forEach(row => {
+				        const cells = row.querySelectorAll('td');
+				        if (cells.length === 3) { 
+				            let title = cells[0].innerText.trim();
+				            let url = cells[1].querySelector('a') ? cells[1].querySelector('a').href : "";
+				            let time = cells[2].innerText.trim();
+				            jsonData.push({ title, url, time });
+				        }
+				    });
+
+				    const jsonString = JSON.stringify(jsonData, null, 2);
+				    const blob = new Blob([jsonString], { type: "application/json" });
+				    const link = document.createElement('a');
+				    link.href = URL.createObjectURL(blob);
+				    link.download = "search_results.json";
+				    document.body.appendChild(link);
+				    link.click();
+				    document.body.removeChild(link);
+				});
     </script>
 </body>
 </html>
