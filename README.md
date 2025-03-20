@@ -7,4 +7,4 @@ Search front-end for the Firefox history file, places.sqlite, using NodeJS & Exp
 4. Run: `node server.js` in the terminal.
 5. Open: `http://localhost:3000` in your browser.
 
-![Screenshot_2025-03-20_15-33-23](https://github.com/user-attachments/assets/e78f1e49-8dcd-4cbb-a276-418f452cc8fc)
+![Screenshot_2025-03-20_17-11-17](https://github.com/user-attachments/assets/bad77817-923f-4278-9e04-16bb15f92b5f)
