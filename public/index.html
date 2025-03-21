@@ -1,18 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Firefox History Viewer</title>
     <link href="assets/font-awesome/6.0.0/all.min.css" rel="stylesheet">
     <style>
+        /* General Styles */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
+
         body {
-						font-family: Sans-serif;
+            font-family: Sans-serif;
             background: #010101;
             color: white;
             min-height: 100vh;
@@ -22,9 +25,28 @@
             position: relative;
             overflow: auto;
         }
-        .container {
+
+        /* Wrapper Styles */
+        .wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
             position: relative;
-            z-index: 2;
+            width: 100%; /* Ensure wrapper takes full width */
+            padding: 2rem; /* Add padding for spacing */
+        }
+
+        /* Graphic Styles */
+        .graphic {
+            width: 100%;
+            max-width: 250px; /* Limit image width */
+            margin: 2rem 0 2rem 0;
+            align-self: center; /* Center the image horizontally */
+        }
+
+        /* Container Styles */
+        .container {
             background: #101010;
             padding: 2.5rem;
             border-radius: 10px;
@@ -33,33 +55,42 @@
             box-shadow: 5px 7px 15px #111, -5px -7px 15px #000;
             border: 1px #333 solid;
         }
+
+        /* Heading Styles */
         h1 {
             color: #FFD700;
             text-align: center;
             margin-bottom: 2rem;
             font-size: 2rem;
         }
-				.export {
-						display: block;
-						margin-left: 92%;
-				}
+
+        /* Export Button Styles */
+        .export {
+            display: block;
+            margin-left: 92%; /* Push to the right */
+            margin-bottom: 1rem; /* Add spacing below the button */
+        }
+
         button[type="submit"] {
             padding: 0.6rem;
-						margin: 0 0 10px 0;
             background: #FFA000;
             border-radius: 10px;
             color: #000;
-						font-family: Sans-serif;
+            font-family: Sans-serif;
             font-size: 0.8rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 4px 4px 8px #000;
             position: relative;
+            border: none; /* Remove default border */
         }
+
         button:hover[type="submit"] {
             background: #FFD700;
         }
+
+        /* Search Input Styles */
         #search {
             width: 100%;
             padding: 0.75rem;
@@ -72,11 +103,14 @@
             box-shadow: inset 5px 5px 10px #050505, inset -5px -5px 10px #0f0f0f;
             margin-bottom: 2rem;
         }
+
         #search:focus {
             outline: none;
             border-color: #FFD700;
             box-shadow: 0 0 10px rgba(255, 215, 0, 0.2);
         }
+
+        /* History Container Styles */
         #history-container {
             background: #101010;
             border-radius: 10px;
@@ -84,16 +118,20 @@
             box-shadow: 5px 7px 15px #000000, -5px -7px 15px #111;
             max-height: 60vh;
         }
+
+        /* Table Styles */
         table {
             width: 100%;
             border-collapse: collapse;
         }
+
         thead {
             background: #1a1a1a;
             position: sticky;
             top: 0;
             z-index: 1;
         }
+
         th {
             padding: 1rem;
             text-align: left;
@@ -102,68 +140,110 @@
             font-weight: bold;
             border-bottom: 1px solid #333;
         }
+
         th:hover {
             background: #333;
         }
+
         td {
             padding: 1rem;
             border-bottom: 1px solid #333;
         }
+
         tbody tr:nth-child(odd) {
             background: #151515;
         }
+
         tbody tr:hover {
             background: #333;
             transition: background-color 0.3s ease;
         }
+
+        /* Link Styles */
         a {
             color: #FFD700;
             text-decoration: none;
         }
+
         a:hover {
             text-decoration: underline;
         }
+
+        /* No Results Styles */
         #no-results {
             text-align: center;
             padding: 2rem;
             color: #666;
         }
+
+        /* Media Queries */
         @media (max-width: 768px) {
-            .container { padding: 1.5rem; width: 95%; }
-            h1 { font-size: 1.5rem; }
-            th, td { padding: 0.75rem; font-size: 0.9rem; }
+            .container {
+                padding: 1.5rem;
+                width: 95%;
+            }
+
+            h1 {
+                font-size: 1.5rem;
+            }
+
+            th,
+            td {
+                padding: 0.75rem;
+                font-size: 0.9rem;
+            }
+
+            .graphic {
+                max-width: 150px; /* Adjust image size for smaller screens */
+                margin-bottom: 1.5rem;
+            }
         }
+
+        /* Font Awesome Icon Styles */
         .fas {
             margin-left: 0.5rem;
         }
     </style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>Firefox History Search</h1>
-        <div class="export">
-            <button type="submit" id="export">
-                <i class="fa-solid fa-download"></i> Export
-            </button>
-				</div>
-        <div>
-            <input id="search" type="text" placeholder="Search history..." autocomplete="off">
-        </div>
-        <div id="history-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th data-sort="title">Title <i class="fas fa-sort"></i></th>
-                        <th data-sort="url">URL <i class="fas fa-sort"></i></th>
-                        <th data-sort="time">Time <i class="fas fa-sort"></i></th>
-                    </tr>
-                </thead>
-                <tbody id="history-body">
-                    <tr id="no-results"><td colspan="3">Type to search history...</td></tr>
-                </tbody>
-            </table>
+    <div class="wrapper">
+        <!-- Image Centered Above the Container -->
+        <img src="assets/firefox-history-viewer.png" class="graphic" alt="Firefox History Viewer">
+
+        <div class="container">
+            <!-- Export Button -->
+            <div class="export">
+                <button type="submit" id="export">
+                    <i class="fa-solid fa-download"></i> Export
+                </button>
+            </div>
+
+            <!-- Search Input -->
+            <div>
+                <input id="search" type="text" placeholder="Search history..." autocomplete="off">
+            </div>
+
+            <!-- History Container -->
+            <div id="history-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th data-sort="title">Title <i class="fas fa-sort"></i></th>
+                            <th data-sort="url">URL <i class="fas fa-sort"></i></th>
+                            <th data-sort="time">Time <i class="fas fa-sort"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody id="history-body">
+                        <tr id="no-results">
+                            <td colspan="3">Type to search history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
     <script src="assets/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function () {
@@ -201,7 +281,11 @@
                     return;
                 }
 
-                $.get('/api/history', { search: searchTerm, limit: 100, offset: 0 }, function (data) {
+                $.get('/api/history', {
+                    search: searchTerm,
+                    limit: 100,
+                    offset: 0
+                }, function (data) {
                     if (data.length === 0) {
                         $tbody.append('<tr id="no-results"><td colspan="3">No results found</td></tr>');
                     } else {
@@ -221,29 +305,36 @@
             }
         });
 
-				document.getElementById('export').addEventListener('click', function () {
-				    const rows = document.querySelectorAll('#history-body tr');
-				    let jsonData = [];
+        document.getElementById('export').addEventListener('click', function () {
+            const rows = document.querySelectorAll('#history-body tr');
+            let jsonData = [];
 
-				    rows.forEach(row => {
-				        const cells = row.querySelectorAll('td');
-				        if (cells.length === 3) { 
-				            let title = cells[0].innerText.trim();
-				            let url = cells[1].querySelector('a') ? cells[1].querySelector('a').href : "";
-				            let time = cells[2].innerText.trim();
-				            jsonData.push({ title, url, time });
-				        }
-				    });
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                if (cells.length === 3) {
+                    let title = cells[0].innerText.trim();
+                    let url = cells[1].querySelector('a') ? cells[1].querySelector('a').href : "";
+                    let time = cells[2].innerText.trim();
+                    jsonData.push({
+                        title,
+                        url,
+                        time
+                    });
+                }
+            });
 
-				    const jsonString = JSON.stringify(jsonData, null, 2);
-				    const blob = new Blob([jsonString], { type: "application/json" });
-				    const link = document.createElement('a');
-				    link.href = URL.createObjectURL(blob);
-				    link.download = "search_results.json";
-				    document.body.appendChild(link);
-				    link.click();
-				    document.body.removeChild(link);
-				});
+            const jsonString = JSON.stringify(jsonData, null, 2);
+            const blob = new Blob([jsonString], {
+                type: "application/json"
+            });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = "search_results.json";
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
     </script>
 </body>
+
 </html>
