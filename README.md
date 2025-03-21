@@ -7,4 +7,4 @@ Search front-end for the Firefox history file, [places.sqlite](https://en.wikive
 4. Run: `node server.js`
 5. Open: `http://localhost:3000`
 
-![Screenshot_2025-03-21_15-26-34](https://github.com/user-attachments/assets/40ef1577-388e-4c83-8f4c-9fe9fd144a8c)
+![Untitled](https://github.com/user-attachments/assets/7f4c5dfc-92c8-494b-8265-f28383d6553c)
