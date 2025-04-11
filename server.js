@@ -15,23 +15,46 @@ app.get('/api/history', (req, res) => {
     const limit = parseInt(req.query.limit) || 100;
     const offset = parseInt(req.query.offset) || 0;
     const search = req.query.search || '';
+    const sortField = req.query.sort || 'time';
+    const sortOrder = req.query.order === 'asc' ? 'ASC' : 'DESC';
+
+    const sortableFields = {
+        title: 'title',
+        url: 'url',
+        time: 'last_visit_date'
+    };
+
+    const safeSortField = sortableFields[sortField] || 'last_visit_date';
 
     let query = `
-        SELECT title, url, datetime(last_visit_date/1000000, 'unixepoch', 'localtime') AS time
-        FROM moz_places
-        WHERE last_visit_date IS NOT NULL
+        WITH base AS (
+            SELECT DISTINCT title, url, last_visit_date
+            FROM moz_places
+            WHERE last_visit_date IS NOT NULL
     `;
     if (search) {
         query += ` AND (title LIKE ? OR url LIKE ?)`;
     }
-    query += ` ORDER BY last_visit_date DESC LIMIT ? OFFSET ?`;
+    query += `
+            ORDER BY last_visit_date DESC
+            LIMIT ? OFFSET ?
+        )
+        SELECT title, url, datetime(last_visit_date/1000000, 'unixepoch', 'localtime') AS time
+        FROM base
+        ORDER BY ${safeSortField} ${sortOrder}
+    `;
 
     const params = search ? [`%${search}%`, `%${search}%`, limit, offset] : [limit, offset];
 
+    console.log('Query:', query);
+    console.log('Params:', params);
+
     db.all(query, params, (err, rows) => {
         if (err) {
+            console.error('Query error:', err.message);
             res.status(500).json({ error: err.message });
         } else {
+            console.log('Rows returned:', rows.length);
             res.json(rows);
         }
         db.close();
